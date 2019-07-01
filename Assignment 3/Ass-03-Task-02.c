@@ -1,5 +1,5 @@
 #include "Ass-03.h"
-#define BUTTON_NUM 8
+
 
 //
 // This task can be used as the main pulse rate application as it takes
@@ -13,44 +13,24 @@
 
 void Ass_03_Task_02(void const * argument)
 {
-	uint32_t loop=0;
+	int selected_button = 0;	// button selected and returned from the button_select() function
+	int prev_button = 0;	// previous button pressed
 
 	Coordinate display;
 
 	osSignalWait(1,osWaitForever);
 	safe_printf("Hello from Task 2 - Pulse Rate Application (touch screen input)\n");
 
-	const structdata screen_list[] =
-	{
-			{5, 63, 5, 57, 1, &load},
-			{68, 126, 5, 57, 2, &save},
-			{131, 189, 5, 57, 3, &play},		// structure containing char added to answer string, x and y hitbox boundaries, and the buttons "operation"
-			{194, 262, 5, 57, 4, &stop},
-			{257, 315, 5, 57, 5, &debug},
-			{5, 60, 62, 114, 6, &mem1},
-			{5, 60, 119, 171, 7, &mem2},
-			{5, 60, 176, 228, 8, &mem3}
-	};
-	int i = 0;
-	int result = 0;
-
 	while (1)
 	{
-		if (getfp(&display) == 0)
+		if (getfp(&display) == 0)	// if a button is pressed on screen
 		{
-			//safe_printf("Task 2: %d (got  %3d,%3d)\n", loop, display.x, display.y);
-			for (i = 0; i < BUTTON_NUM; i++)
+			selected_button = button_select(display.y, display.x, prev_button);		// button selected on the screen, integer returned based on the struct in button.h
+			if (get_debug())		// if debug is turned on
 			{
-				//safe_printf("\ty1 = %d, y2 = %d,\nx1 = %d, x2 = %d,\nscreen position y = %d, screen position x = %d\n",
-				//		screen_list[i].ypos1, screen_list[i].ypos2, screen_list[i].xpos1, screen_list[i].xpos2, display.y, display.x);
-				if((display.y > screen_list[i].ypos1) && (display.y < screen_list[i].ypos2) &&
-						(display.x > screen_list[i].xpos1) && (display.x < screen_list[i].xpos2))
-				{
-					safe_printf("Task 2: %d (got  %3d,%3d)\n", loop, display.x, display.y);
-					result = screen_list[i].Function();
-					break;
-				}
+				safe_printf("%sSelected button = %d%s\n", BLUE, selected_button, WHITE);	// output the selected button to putty
 			}
+			prev_button = selected_button;		//
 		}
 	}
 }
@@ -58,62 +38,94 @@ void Ass_03_Task_02(void const * argument)
 int play()
 {
 	//play
-	safe_printf("play\n");
-	set_stop(0);
-	safe_printf("stop state: %d\n", state.stop);
+	if (get_debug())
+	{
+		safe_printf("play\n");	// tell putty that play was selected and successfully run
+	}
+	osDelay(100);	// 100ms delay
+	set_stop(0);	// call the set function that will change the stop variable to 0, causing the wave to un-stop
 	return 0;
 }
 int stop()
 {
 	//stop
-	safe_printf("stop\n");
-	set_stop(1);
-	safe_printf("stop state: %d\n", state.stop);
+	if (get_debug())
+	{
+		safe_printf("stop\n");	// tell putty that stop was selected and successfully run
+	}
+	osDelay(100);	// 100ms delay
+	set_stop(1);	// call the set function that will change the stop variable to 1, causing the wave to stop
 	return 0;
 }
 int save()
 {
 	//save
-	safe_printf("save\n");
+	if (get_debug())
+	{
+		safe_printf("save\n");		// tell putty that save was selected and successfully run
+	}
+	osDelay(100);				// 100ms delay
+	set_stop(1);				// call the set function that will change the stop variable to 1, causing the wave to stop
+	temp_to_memory();			// save the memory stored in temporary storage to memory-specific storage
+	myWriteFile();				// save the memory stored in temporary storage to the SD card, according to memory selected
 	return 0;
 }
 int load()
 {
 	//load
-	safe_printf("load\n");
+	if (get_debug())
+	{
+		safe_printf("load\n");				// tell putty that load was selected and successfully run
+	}
+	osDelay(100);					// 100ms delay
+	set_stop(1);					// call the set function that will change the stop variable to 1, causing the wave to stop
+	myReadFile();					// read memory from the SD card, based on memory selected
+	draw_saved_graph();				// draw the saved graph on the screen
 	return 0;
 }
-int debug()
+int erase()
 {
 	//func1
-	safe_printf("debug\n");
-	/*
-	int debug_state = get_debug();
-	if (debug_state == 1)
+	if (get_debug())
 	{
-		safe_printf("Debug is currently on\n");
+		safe_printf("erase\n");	// tell putty that erase was selected and successfully run
 	}
-	else
+	osDelay(100);	// 100ms delay
+	set_stop(1);	// call the set function that will change the stop variable to 1, causing the wave to stop
+	osDelay(100);
+	wipe_screen();	// clear the screen
+	return 0;
+}
+int memory()
+{
+	//change memory
+	if (get_debug())
 	{
-		safe_printf("Debug is currently off\n");
-	}*/
+		safe_printf("memory\n");	// tell putty that memory was selected and successfully run
+	}
+	osDelay(100);	// 100ms delay
+	change_memory(0);	// toggle the selected memory between 1, 2, 3
 	return 0;
 }
-int mem1()
+int more_speed()
 {
-	//mem1
-	safe_printf("mem1\n");
+	//increase speed
+	if (get_debug())
+	{
+		safe_printf("speed +\n");	// tell putty that the increase speed was selected and successfully run
+	}
+	osDelay(100);	// 100ms delay
+	increment_speed_plus();		// increase the speed value by decreasing the speed value by 1
 	return 0;
 }
-int mem2()
+int less_speed()
 {
-	//mem2
-	safe_printf("mem2\n");
-	return 0;
-}
-int mem3()
-{
-	//mem3
-	safe_printf("mem3\n");
+	//decrease speed
+	if (get_debug())
+	{
+		safe_printf("speed -\n");	// tell putty that the decrease speed was selected and successfully run
+	}
+	osDelay(100);	// 100ms delay
+	increment_speed_minus();	// decrease the speed value by increasing the speed value by 1
 	return 0;
 }

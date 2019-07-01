@@ -41,6 +41,7 @@ extern osMutexId myMutex01Handle; // Protect LCD
 extern osMutexId myMutex02Handle; // Protect console output
 extern osMutexId myMutex03Handle;
 extern osMutexId myMutex04Handle;
+extern osMutexId myMutex05Handle;
 
 // Assignment tasks
 extern void Ass_03_Task_01(void const *argument);
@@ -49,9 +50,6 @@ extern void Ass_03_Task_03(void const *argument);
 extern void Ass_03_Task_04(void const *argument);
 
 // Task 1
-void drawplay(int xpos, int ypos);
-void drawstop(int xpos, int ypos);
-void drawsave(int xpos, int ypos);
 void debug_function(unsigned int ArgNum, uint8_t **Arguments[]);
 void speed_function(unsigned int ArgNum, uint8_t **Arguments[]);
 int string_parser(char *inp, char ***array_of_words_p, char character_to_search);
@@ -59,6 +57,13 @@ FRESULT ls_function (unsigned int ArgNum, uint8_t **Arguments[]);
 FRESULT cd_function(unsigned int ArgNum, uint8_t **Arguments[]);
 FRESULT mkdir_function (unsigned int ArgNum, uint8_t **Arguments[]);
 FRESULT cp_function (unsigned int ArgNum, uint8_t **Arguments[]);
+FRESULT rm_function (unsigned int ArgNum, uint8_t **Arguments[]);
+FRESULT delete_directory(uint8_t *path);
+FRESULT HelpFunction(unsigned int ArgNum,uint8_t **Arguments[]);
+FRESULT mov_function (unsigned int ArgNum, uint8_t **Arguments[]);
+void memory_setting_function (unsigned int ArgNum, uint8_t **Arguments[]);
+
+
 typedef struct{
 	int8_t *NameString;
 	int (*Function_p)(unsigned int ArgNum, uint8_t **Arguments[]);
@@ -69,18 +74,31 @@ typedef struct{
 // Task 2
 int save();
 int load();
-int mem1();
-int mem2();
-int mem3();
-int debug();
+int memory();
+int more_speed();
+int less_speed();
+int erase();
 int stop();
 int play();
 
 // Task 4
+int myReadFile(void);
+void myWriteFile();
+void draw_saved_graph();
+
+//Putty Colours
+#define RED "\e[0;31m"
+#define GREEN "\e[0;32m"
+#define YELLOW "\e[0;33m"
+#define BLUE "\e[0;34m"
+#define PURPLE "\e[0;35m"
+#define CYAN "\e[0;36m"
+#define WHITE "\e[0;37m"
 
 // Other files
-#include "debug.h"
+#include "information.h"
 #include "button.h"
+#include "drawLCD.h"
 
 // Library functions
 extern uint8_t BSP_TP_Init(void);
